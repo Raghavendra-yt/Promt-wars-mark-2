@@ -36,9 +36,43 @@ async function init() {
   setupChatForm();
   setupQuickPrompts();
   setupSosBubble();
+  setupIntersectionObserver();
+  registerServiceWorker();
   await loadConfig();
   connectWebSocket();
-  initFirebase();
+
+  // Wait for Firebase modules to load if not already available
+  if (!window.__firebaseModules) {
+    console.log('Waiting for Firebase modules...');
+    window.__onFirebaseLoaded = () => initFirebase();
+  } else {
+    initFirebase();
+  }
+}
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.error('SW registration failed', err));
+    });
+  }
+}
+
+let isPageVisible = true;
+function setupIntersectionObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    isPageVisible = entries[0].isIntersecting;
+  }, { threshold: 0.1 });
+  
+  // Observe the main content area
+  observer.observe(document.querySelector('main'));
+
+  // Also handle visibility API
+  document.addEventListener('visibilitychange', () => {
+    isPageVisible = document.visibilityState === 'visible';
+  });
 }
 
 /* ── SOS Speed Dial Setup ── */
@@ -176,6 +210,9 @@ function connectWebSocket() {
   });
 
   ws.addEventListener('message', (event) => {
+    // Efficiency: Ignore updates if tab is backgrounded
+    if (!isPageVisible) return;
+
     try {
       const data = JSON.parse(event.data);
       if (data.type === 'crowd-update') {
@@ -339,19 +376,20 @@ async function initMap() {
   }
 
   try {
-    await window.__loadGoogleMaps(apiKey);
-    state.mapsLoaded = true;
+    const { Map } = await google.maps.importLibrary('maps');
+    const { Marker } = await google.maps.importLibrary('marker');
+    const { HeatmapLayer } = await google.maps.importLibrary('visualization');
 
     // M. Chinnaswamy Stadium, Bengaluru
     const STADIUM = { lat: 12.9784, lng: 77.5994 };
 
-    state.map = new google.maps.Map($('stadium-map'), {
+    state.map = new Map($('stadium-map'), {
       center: STADIUM,
       zoom: 17,
+      mapId: 'SMART_STADIUM_MAP', // Required for advanced markers
       mapTypeId: 'satellite',
       mapTypeControl: false,
       streetViewControl: false,
-      styles: [{ featureType: 'all', stylers: [{ saturation: -20 }] }],
     });
 
     // Gate markers
@@ -363,7 +401,7 @@ async function initMap() {
     ];
 
     gates.forEach((g) => {
-      const marker = new google.maps.Marker({
+      const marker = new Marker({
         position: g.pos,
         map: state.map,
         title: g.label,
@@ -374,7 +412,7 @@ async function initMap() {
 
     // Crowd heat map overlay
     const heatmapData = buildHeatmapData(state.zones);
-    state.heatmap = new google.maps.visualization.HeatmapLayer({
+    state.heatmap = new HeatmapLayer({
       data: heatmapData,
       map: state.map,
       radius: 60,
@@ -531,6 +569,10 @@ function setupChatForm() {
     const query = input.value.trim();
     if (!query) return;
     input.value = '';
+    
+    // Debounce preventing accidental double-submits
+    if (state.isAITyping) return;
+    
     await sendChatMessage(query);
   });
 }
@@ -546,6 +588,7 @@ async function sendChatMessage(query) {
   const typingEl = showTypingIndicator();
   const sendBtn = $('chat-send');
   sendBtn.disabled = true;
+  state.isAITyping = true;
 
   // Streaming via SSE
   try {
@@ -586,6 +629,7 @@ async function sendChatMessage(query) {
     typingEl.remove();
     appendChatMessage('assistant', 'Sorry, I could not get a response right now. Please try again.');
   } finally {
+    state.isAITyping = false;
     sendBtn.disabled = false;
     $('chat-input').focus();
   }

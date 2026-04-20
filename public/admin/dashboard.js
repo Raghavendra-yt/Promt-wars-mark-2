@@ -25,6 +25,16 @@ document.querySelectorAll('.nav-item').forEach((btn) => {
   });
 });
 
+/* ── Utility: Visibility Throttling ── */
+let isDashboardVisible = true;
+const dashObserver = new IntersectionObserver((entries) => {
+  isDashboardVisible = entries[0].isIntersecting;
+}, { threshold: 0.1 });
+dashObserver.observe(document.querySelector('main'));
+document.addEventListener('visibilitychange', () => {
+  isDashboardVisible = document.visibilityState === 'visible';
+});
+
 /* ── WebSocket ── */
 function connectWS() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -36,6 +46,7 @@ function connectWS() {
   };
 
   ws.onmessage = ({ data }) => {
+    if (!isDashboardVisible) return;
     try {
       const payload = JSON.parse(data);
       if (payload.type === 'crowd-update') {

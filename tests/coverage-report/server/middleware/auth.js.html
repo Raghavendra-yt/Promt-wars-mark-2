@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/18</span>
+                <span class='fraction'>12/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">44.44% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>4/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/18</span>
+                <span class='fraction'>12/18</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -105,36 +105,36 @@
 <a name='L40'></a><a href='#L40'>40</a>
 <a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -142,26 +142,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">'use strict';
 &nbsp;
-const { verifyToken } = <span class="cstat-no" title="statement not covered" >require('../services/firebase-admin');</span>
-const { logger } = <span class="cstat-no" title="statement not covered" >require('../utils/logger');</span>
+const { verifyToken } = require('../services/firebase-admin');
+const { logger } = require('../utils/logger');
 &nbsp;
 /**
  * Middleware: Verify Firebase ID token from Authorization header.
  * Attaches decoded user to req.user.
  */
-async function <span class="fstat-no" title="function not covered" >requireAuth(</span>req, res, next) {
-<span class="cstat-no" title="statement not covered" >  try {</span>
-    const header = <span class="cstat-no" title="statement not covered" >req.headers.authorization || '';</span>
-<span class="cstat-no" title="statement not covered" >    if (!header.startsWith('Bearer ')) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(401).json({ error: 'Missing or invalid Authorization header' });</span>
+async function requireAuth(req, res, next) {
+  try {
+    const header = req.headers.authorization || '';
+    if (!header.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Missing or invalid Authorization header' });
     }
-    const token = <span class="cstat-no" title="statement not covered" >header.slice(7);</span>
-    const decoded = <span class="cstat-no" title="statement not covered" >await verifyToken(token);</span>
-<span class="cstat-no" title="statement not covered" >    req.user = decoded;</span>
-<span class="cstat-no" title="statement not covered" >    next();</span>
+    const token = header.slice(7);
+    const decoded = await verifyToken(token);
+    req.user = decoded;
+    next();
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    logger.warn('Auth verification failed', { error: err.message });</span>
 <span class="cstat-no" title="statement not covered" >    return res.status(401).json({ error: 'Unauthorized — invalid token' });</span>
@@ -172,8 +172,8 @@ async function <span class="fstat-no" title="function not covered" >requireAuth(
  * Middleware factory: Require a specific role.
  * @param {...string} roles - Allowed roles (e.g. 'admin', 'staff')
  */
-function <span class="fstat-no" title="function not covered" >requireRole(</span>...roles) {
-<span class="cstat-no" title="statement not covered" >  return <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {</span>
+function requireRole(...roles) {
+  return <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
     const userRole = <span class="cstat-no" title="statement not covered" >req.user?.role || req.user?.customClaims?.role || 'attendee';</span>
 <span class="cstat-no" title="statement not covered" >    if (!roles.includes(userRole)) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: `Forbidden — requires one of: ${roles.join(', ')}` });</span>
@@ -182,7 +182,7 @@ function <span class="fstat-no" title="function not covered" >requireRole(</span
   };
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = { requireAuth, requireRole };</span>
+module.exports = { requireAuth, requireRole };
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -190,7 +190,7 @@ function <span class="fstat-no" title="function not covered" >requireRole(</span
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-17T04:32:00.742Z
+                at 2026-04-18T09:57:27.896Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

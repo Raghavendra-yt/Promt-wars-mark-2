@@ -1,54 +1,53 @@
-const CACHE_NAME = 'smartstadium-v2';
+'use strict';
+
+const CACHE_NAME = 'smartstadium-v2.1';
 const STATIC_ASSETS = [
   '/app/',
   '/app/index.html',
   '/app/style.css',
   '/app/app.js',
+  '/app/manifest.json',
+  'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Outfit:wght@400;600;700;800&display=swap'
 ];
 
-// Install: pre-cache static assets
-self.addEventListener('install', (e) => {
-  e.waitUntil(
+self.addEventListener('install', (event) => {
+  event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate: remove old caches
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    })
   );
   self.clients.claim();
 });
 
-// Fetch: cache-first for static, network-first for API
-self.addEventListener('fetch', (e) => {
-  const { request } = e;
-  const url = new URL(request.url);
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
 
-  // Network-first for API calls
+  // API calls: Network-first
   if (url.pathname.startsWith('/api/')) {
-    e.respondWith(
-      fetch(request)
-        .then((res) => res)
-        .catch(() => new Response(JSON.stringify({ error: 'Offline' }), {
-          headers: { 'Content-Type': 'application/json' },
-        }))
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Cache-first for static assets
-  e.respondWith(
-    caches.match(request).then((cached) =>
-      cached || fetch(request).then((res) => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        return res;
-      })
-    )
+  // Static assets: Cache-first
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).then((fetchRes) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, fetchRes.clone());
+          return fetchRes;
+        });
+      });
+    })
   );
 });

@@ -16,10 +16,13 @@ const WebSocket = require('ws');
 
 const { createApiLimiter } = require('./middleware/rateLimit');
 const { logger } = require('./utils/logger');
+const { LIMITS } = require('./constants');
+const errorHandler = require('./middleware/errorHandler');
 const crowdRoutes = require('./routes/crowd');
 const geminiRoutes = require('./routes/gemini');
 const authRoutes = require('./routes/auth');
 const healthRoutes = require('./routes/health');
+const perfRoutes = require('./routes/perf');
 const { startSimulator } = require('./simulator');
 
 const app = express();
@@ -43,6 +46,20 @@ function broadcast(data) {
   });
 }
 app.locals.broadcast = broadcast;
+
+// ── Efficiency: Compression MUST be first ──────────────────────────────────
+app.use(compression());
+
+// ── Efficiency: Cache-Control Headers ──────────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  } else if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|woff2|json)$/)) {
+    // Immutable cache for static assets (leveraging service worker)
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  next();
+});
 
 // ── Trust Cloud Run proxy ──────────────────────────────────────────────────
 app.set('trust proxy', 1);
@@ -97,9 +114,8 @@ app.use(
 );
 
 // ── General middleware ─────────────────────────────────────────────────────
-app.use(compression());
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: false, limit: '10kb' }));
+app.use(express.json({ limit: LIMITS.JSON_BODY_LIMIT }));
+app.use(express.urlencoded({ extended: false, limit: LIMITS.JSON_BODY_LIMIT }));
 app.use(morgan('combined'));
 
 // ── Rate limiting ─────────────────────────────────────────────────────────
@@ -117,18 +133,13 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/crowd', crowdRoutes);
 app.use('/api/gemini', geminiRoutes);
+app.use('/_perf', perfRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
 // ── Global error handler ──────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  logger.error('Unhandled error', { error: err.message });
-  res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-  });
-});
+app.use(errorHandler);
 
 // ── Start ─────────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || '3000', 10);

@@ -8,25 +8,7 @@
  * All functions are pure and fully unit-tested.
  */
 
-/** Maximum capacity (persons) for each stadium zone */
-const ZONE_CAPACITY = {
-  'north-stand': 12000,
-  'south-stand': 12000,
-  'east-stand': 8000,
-  'west-stand': 8000,
-  'vip-pavilion': 3000,
-  'media-center': 500,
-};
-
-/** Throughput (persons per minute) for each entry gate */
-const GATE_CAPACITY_PER_MINUTE = {
-  'gate-a': 150,
-  'gate-b': 150,
-  'gate-c': 120,
-  'gate-d': 120,
-  'gate-e': 80,
-  'gate-f': 80,
-};
+const { ZONE_CAPACITY, GATE_CAPACITY, THRESHOLDS } = require('../constants');
 
 /**
  * Calculate crowd density percentage for a zone.
@@ -51,7 +33,7 @@ function calculateDensity(zoneId, currentCount) {
  */
 function estimateWaitTime(queueLength, gateId) {
   if (queueLength < 0) throw new Error('Queue length cannot be negative');
-  const throughput = GATE_CAPACITY_PER_MINUTE[gateId];
+  const throughput = GATE_CAPACITY[gateId];
   if (!throughput) throw new Error(`Invalid gate: ${gateId}`);
   if (queueLength === 0) return 0;
   return Math.ceil(queueLength / throughput);
@@ -126,8 +108,8 @@ function predictTimeToFill(zoneId, currentCount, flowRate) {
  * @returns {'normal'|'warning'|'critical'}
  */
 function getAlertLevel(density) {
-  if (density >= 90) return 'critical';
-  if (density >= 70) return 'warning';
+  if (density >= THRESHOLDS.CRITICAL) return 'critical';
+  if (density >= THRESHOLDS.WARNING) return 'warning';
   return 'normal';
 }
 
@@ -149,7 +131,7 @@ function calculateAverageDensity(zoneDensities) {
  * @param {number} [threshold=0.7] - Fraction of capacity to trigger alert
  * @returns {{ alert: boolean, density: number, level: string }}
  */
-function checkZoneThreshold(zoneId, currentCount, threshold = 0.7) {
+function checkZoneThreshold(zoneId, currentCount, threshold = THRESHOLDS.DEFAULT_ALERT_FRACTION) {
   const density = calculateDensity(zoneId, currentCount);
   const thresholdPct = threshold * 100;
   return {
@@ -188,5 +170,5 @@ module.exports = {
   checkZoneThreshold,
   generateCrowdAnnouncement,
   ZONE_CAPACITY,
-  GATE_CAPACITY_PER_MINUTE,
+  GATE_CAPACITY_PER_MINUTE: GATE_CAPACITY,
 };

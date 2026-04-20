@@ -10,9 +10,20 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
 
-  <!-- Google Fonts -->
+  <!-- Efficiency: Resource hints -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://maps.googleapis.com" />
+  <link rel="preconnect" href="https://www.gstatic.com" />
+  <link rel="preconnect" href="https://www.googleapis.com" />
+  <link rel="dns-prefetch" href="https://maps.googleapis.com" />
+  <link rel="dns-prefetch" href="https://www.gstatic.com" />
+  <link rel="dns-prefetch" href="https://*.firebaseio.com" />
+
+  <!-- Critical assets preload -->
+  <link rel="preload" href="style.css" as="style" />
+  <link rel="preload" href="app.js" as="script" />
+
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Main styles -->
@@ -351,13 +362,44 @@
     aria-atomic="true"
   ></div>
 
-  <!-- ── Firebase SDK (loaded from CDN) ─────────────────────── -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, onSnapshot, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    // CDN endpoints
+    const CDN_APP = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    const CDN_DB  = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    const CDN_AUTH= 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-    window.__firebaseModules = { initializeApp, getFirestore, collection, onSnapshot, doc, getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut };
+    // Local fallbacks
+    const LOCAL_APP  = '../lib/firebase-app.js';
+    const LOCAL_DB   = '../lib/firebase-firestore.js';
+    const LOCAL_AUTH = '../lib/firebase-auth.js';
+
+    async function loadModule(cdn, local) {
+      try {
+        return await import(cdn);
+      } catch (err) {
+        console.warn(`Failed to load ${cdn}, falling back to ${local}`);
+        return await import(local);
+      }
+    }
+
+    async function init() {
+      try {
+        const [appMod, dbMod, authMod] = await Promise.all([
+          loadModule(CDN_APP, LOCAL_APP),
+          loadModule(CDN_DB, LOCAL_DB),
+          loadModule(CDN_AUTH, LOCAL_AUTH)
+        ]);
+
+        window.__firebaseModules = { 
+          ...appMod, ...dbMod, ...authMod
+        };
+        // Re-trigger main app init if it was waiting
+        if (window.__onFirebaseLoaded) window.__onFirebaseLoaded();
+      } catch (err) {
+        console.error('Critical: Failed to load Firebase modules from both CDN and Local storage.', err);
+      }
+    }
+    init();
   </script>
 
   <!-- Main app script -->

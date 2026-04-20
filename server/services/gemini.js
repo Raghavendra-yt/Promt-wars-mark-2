@@ -8,8 +8,9 @@
 
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 
+const { LIMITS } = require('../constants');
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-const MAX_QUERY_LENGTH = 2000;
+const MAX_QUERY_LENGTH = LIMITS.MAX_QUERY_LENGTH;
 
 const SAFETY_SETTINGS = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
